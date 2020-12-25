@@ -1,21 +1,34 @@
-# peercoin/peercoind
+# primecoin/primecoind
 
-[![](https://images.microbadger.com/badges/image/peercoin/peercoind.svg)](https://microbadger.com/images/peercoin/peercoind "Size/Layers")
-
-Peercoind docker image. Provides a classic peercoin binary built from the [github/peercoin](https://github.com/peercoin/peercoin) repository.
-
-## Supported tags
-
-See <https://hub.docker.com/r/peercoin/peercoind/tags>
+Primecoind docker image. Provides a classic primecoin binary built from the [github/primecoin](https://github.com/primecoin/primecoin) repository.
 
 ## Usage
 
+```sh
+$ docker run --name primecoind \
+  -v /home/ubuntu/docker-primecoind-data:/data \
+  -p 9911:9911 \
+  -p 9912:9912 \
+  -d primecoin/primecoind \
+  -txindex \
+  -printtoconsole \
+  -rpcallowip=0.0.0.0/0 \
+  -rpcpassword=bar \
+  -rpcuser=foo
+```
+
+## Supported tags
+
+See <https://hub.docker.com/r/primecoin/primecoind/tags>
+
+## Usage - More Explanations
+
 ### How to use this image
 
-It behaves like a binary, so you can pass any arguments to the image and they will be forwarded to the `peercoind` binary:
+It behaves like a command, so you can pass any arguments to the image and they will be forwarded to the `primecoind` binary:
 
 ```sh
-$ docker run --name peercoind -d peercoin/peercoind \
+$ docker run --name primecoind -d primecoin/primecoind \
   -rpcallowip=0.0.0.0/0 \
   -rpcpassword=bar \
   -rpcuser=foo
@@ -24,42 +37,41 @@ $ docker run --name peercoind -d peercoin/peercoind \
 Use the same command to start the testnet container:
 
 ```sh
-$ docker run --name testnet-peercoind -d peercoin/peercoind \
+$ docker run --name primecoind-testnet -d primecoin/primecoind \
   -rpcallowip=0.0.0.0/0 \
   -rpcpassword=bar \
   -rpcuser=foo \
-  -testnet=1
+  -testnet
 ```
 
-By default, `peercoin` will run as as user `peercoin` for security reasons and store data in `/data`. If you'd like to customize where `peercoin` stores its data, use the `PPC_DATA` environment variable. The directory will be automatically created with the correct permissions for the user and `peercoin` automatically configured to use it.
+By default, `primecoin` will run as as user `primecoin` for security reasons and store data in `/data`. If you'd like to customize where `primecoin` stores its data, use the `XPM_DATA` environment variable. The directory will be automatically created with the correct permissions for the user and `primecoin` automatically configured to use it.
 
 ```sh
-$ docker run --env PPC_DATA=/var/lib/peercoin --name peercoind -d peercoin/peercoind
+$ docker run --env XPM_DATA=/var/lib/primecoin --name primecoind -d primecoin/primecoind
 ```
 
 You can also mount a host directory at `/data` like so:
 
 ```sh
-$ docker run -v /opt/peercoin:/data --name peercoind -d peercoin/peercoind
+$ docker run -v /opt/primecoin:/data --name primecoind -d primecoin/primecoind
 ```
-That will allow access to `/data` in the container as `/opt/peercoin` on the host.
+That will allow access to `/data` in the container as `/opt/primecoin` on the host.
 
 ```sh
-$ docker run -v ${PWD}/data:/data --name peercoind -d peercoin/peercoind
+$ docker run -v ${PWD}/data:/data --name primecoind -d primecoin/primecoind
 ```
 will mount the `data` sub-directory at `/data` in the container.
 
 To map container RPC ports to localhost use the `-p` argument with `docker run`:
 
 ```sh
-$ docker run -p 9902:9902 --name peercoind -d peercoin/peercoind -rpcallowip=*
+$ docker run -p 9912:9912 --name primecoind -d primecoin/primecoind -rpcallowip=*
 ```
 You may want to change the port that it is being mapped to if you already run a peercoin instance on the host.
 
-For example: `-p 9999:9902` will map container port 9902 to host port 9999.
+For example: `-p 9999:9912` will map container port 9912 to host port 9999.
 
 Now you will be able to `curl` peercoin in the container:
 
-`curl --user foo:bar --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "getblockchaininfo", "params": [] }'  -H 'content-type: text/plain;' localhost:9902/`
+`curl --user foo:bar --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "getblockchaininfo", "params": [] }'  -H 'content-type: text/plain;' localhost:9912/`
 
-> {"result":{"chain":"main","blocks":457576,"headers":457576,"bestblockhash":"17a24a8073c8f6bc422fc4f6fe8c76da892d0693d0ad1aa499e4b9b2c047fe2b","difficulty":1710444103.933884,"mediantime":1571034759,"verificationprogress":0.9999997034325266,"initialblockdownload":false,"chainwork":"00000000000000000000000000000000000000000000000000336b3807456f56","size_on_disk":700956211,"pruned":false,"warnings":""},"error":null,"id":"curltest"}
