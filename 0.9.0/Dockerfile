@@ -1,5 +1,5 @@
 # Build stage for BerkeleyDB
-FROM alpine:3.11 as berkeleydb
+FROM alpine:3.3 as berkeleydb
 
 RUN apk --no-cache add autoconf
 RUN apk --no-cache add automake
@@ -21,8 +21,8 @@ RUN make -j4
 RUN make install
 RUN rm -rf ${BERKELEYDB_PREFIX}/docs
 
-# Build stage for Peercoind
-FROM alpine:3.11 as peercoin-build
+# Build stage for primecoind
+FROM alpine:3.3 as primecoin-build
 
 COPY --from=berkeleydb /opt/ /opt/
 
@@ -42,14 +42,13 @@ RUN apk --no-cache add autoconf \
 
 ENV PEERCOIN_VERSION=0.9.0ppc \
     PEERCOIN_SHA=95f4d50706f0eb2c14e3f3b149cbb3e7bfbc71ea33ef3e778dc9a477841a35b5 \
-    PEERCOIN_PREFIX=/opt/peercoin
+    PRIMECOIN_PREFIX=/opt/primecoin
 
-RUN wget -q -O peercoin.tar.gz https://github.com/peercoin/peercoin/archive/v${PEERCOIN_VERSION}.tar.gz \
-    && echo "${PEERCOIN_SHA}  peercoin.tar.gz" | sha256sum -c -
+RUN apk --no-cache add git
+RUN git clone https://github.com/primecoin/primecoin
+RUN cd primecoin && git checkout primecoin-0.16.3
 
-RUN tar -xzf peercoin.tar.gz
-
-WORKDIR /peercoin-${PEERCOIN_VERSION}
+WORKDIR /primecoin
 
 # ./configure can't find berkley db unless we do this
 RUN ln -s /opt/berkleydb /usr/include/db4.8 \
@@ -58,7 +57,7 @@ RUN ln -s /opt/berkleydb /usr/include/db4.8 \
 
 RUN ./autogen.sh
 RUN ./configure \
-    --prefix=${PEERCOIN_PREFIX} \
+    --prefix=${PRIMECOIN_PREFIX} \
     --mandir=/usr/share/man \
     --disable-tests \
     --disable-bench \
@@ -69,16 +68,16 @@ RUN ./configure \
     --with-daemon
 RUN make -j4
 RUN make install
-RUN strip ${PEERCOIN_PREFIX}/bin/peercoin-cli
-RUN strip ${PEERCOIN_PREFIX}/bin/peercoin-tx
-RUN strip ${PEERCOIN_PREFIX}/bin/peercoind
-RUN strip ${PEERCOIN_PREFIX}/lib/libpeercoinconsensus.a
-RUN strip ${PEERCOIN_PREFIX}/lib/libpeercoinconsensus.so.0.0.0
+RUN strip ${PRIMECOIN_PREFIX}/bin/primecoin-cli
+RUN strip ${PRIMECOIN_PREFIX}/bin/primecoin-tx
+RUN strip ${PRIMECOIN_PREFIX}/bin/primecoind
+RUN strip ${PRIMECOIN_PREFIX}/lib/libbitcoinconsensus.a
+RUN strip ${PRIMECOIN_PREFIX}/lib/libbitcoinconsensus.so.0.0.0
 
 # Build stage for compiled artifacts
-FROM alpine:3.11
+FROM alpine:3.3
 
-RUN adduser -S peercoin && \
+RUN adduser -S primecoin && \
   apk --no-cache add \
     boost \
     boost-program_options \
@@ -88,19 +87,19 @@ RUN adduser -S peercoin && \
     su-exec \
     bash
 
-ENV PPC_DATA=/data
-ENV PEERCOIN_PREFIX=/opt/peercoin
-ENV PATH=${PEERCOIN_PREFIX}/bin:$PATH
-ENV RPC_PASSWORD=ppcpass
-ENV RPC_USER=ppcuser
+ENV XPM_DATA=/data
+ENV PRIMECOIN_PREFIX=/opt/primecoin
+ENV PATH=${PRIMECOIN_PREFIX}/bin:$PATH
+ENV RPC_PASSWORD=xpmpass
+ENV RPC_USER=xpmuser
 
-COPY --from=peercoin-build /opt /opt
+COPY --from=primecoin-build /opt /opt
 COPY docker-entrypoint.sh /entrypoint.sh
 
-VOLUME ["${PPC_DATA}"]
+VOLUME ["${XPM_DATA}"]
 
-EXPOSE 9901 9902 9903 9904
+EXPOSE 9911 9912 9913 9914
 
 ENTRYPOINT ["/entrypoint.sh"]
 
-CMD ["peercoind"]
+CMD ["primecoind"]

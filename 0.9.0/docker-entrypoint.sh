@@ -2,31 +2,31 @@
 set -e
 
 if [ "$(echo "$1" | cut -c1)" = "-" ]; then
-  echo "$0: assuming arguments for peercoind"
-  set -- peercoind "$@"
+  echo "$0: assuming arguments for primecoind"
+  set -- primecoind "$@"
 fi
 
-if [ "$(echo "$1" | cut -c1)" = "-" ] || [ "$1" = "peercoind" ]; then
+if [ "$(echo "$1" | cut -c1)" = "-" ] || [ "$1" = "primecoind" ]; then
 
-  mkdir -p "$PPC_DATA"
-  chmod 700 "$PPC_DATA"
-  chown -R peercoin "$PPC_DATA"
+  mkdir -p "$XPM_DATA"
+  chmod 700 "$XPM_DATA"
+  chown -R primecoin "$XPM_DATA"
 
-	if [[ ! -s "$PPC_DATA/peercoin.conf" ]]; then
-    cat <<-EOF > "$PPC_DATA/peercoin.conf"
+	if [[ ! -s "$XPM_DATA/primecoin.conf" ]]; then
+    cat <<-EOF > "$XPM_DATA/primecoin.conf"
     rpcallowip=::/0
     rpcpassword=${RPC_PASSWORD}
     rpcuser=${RPC_USER}
 		EOF
-    chown peercoin "$PPC_DATA/peercoin.conf"
+    chown primecoin "$XPM_DATA/primecoin.conf"
 	fi
 
-  set -- "$@" -datadir="$PPC_DATA"
+  set -- "$@" -datadir="$XPM_DATA"
 fi
 
-if [ "$1" = "peercoind" ] || [ "$1" = "peercoin-cli" ] || [ "$1" = "peercoin-tx" ]; then
+if [ "$1" = "primecoind" ] || [ "$1" = "primecoin-cli" ] || [ "$1" = "primecoin-tx" ]; then
   echo
-  exec su-exec peercoin "$@"
+  exec su-exec primecoin "$@"
 fi
 
 exec "$@"

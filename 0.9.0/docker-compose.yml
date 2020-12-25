@@ -1,19 +1,21 @@
 version: '3.5'
 services:
-  peercoind:
+  primecoind:
     build: .
     restart: always
-    image: peercoind:next
+    image: primecoind:next
     environment:
-      - RPC_USER=peercoind
-      - RPC_PASSWORD=peercoindrpc
+      - RPC_USER=primecoind
+      - RPC_PASSWORD=primecoindrpc
     volumes:
       - type: bind
-        source: /opt/peercoin/
+        source: /opt/primecoin/
         target: /data
     command:
-      -nominting
-      -rpcallowip=*
+      -txindex
+      -rpcallowip=0/0.0.0.0
     ports:
-      - '9901:9901'
-      - '9903:9903'
+      - '9911:9911'
+      - '9912:9912'
+      - '9913:9913'
+      - '9914:9914'
