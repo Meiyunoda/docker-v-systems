@@ -44,9 +44,10 @@ ENV PEERCOIN_VERSION=0.9.0ppc \
     PEERCOIN_SHA=95f4d50706f0eb2c14e3f3b149cbb3e7bfbc71ea33ef3e778dc9a477841a35b5 \
     PRIMECOIN_PREFIX=/opt/primecoin
 
+ARG branch=primecoin-0.16.3
 RUN apk --no-cache add git
 RUN git clone https://github.com/primecoin/primecoin
-RUN cd primecoin && git checkout primecoin-0.16.3
+RUN cd primecoin && git checkout ${branch} && echo `git status`
 
 WORKDIR /primecoin
 
