@@ -12,7 +12,7 @@ if [ "$(echo "$1" | cut -c1)" = "-" ] || [ "$1" = "primecoind" ]; then
   chmod 700 "$XPM_DATA"
   chown -R primecoin "$XPM_DATA"
 
-	if [[ ! -s "$XPM_DATA/primecoin.conf" ]]; then
+  if [[ ! -s "$XPM_DATA/primecoin.conf" ]]; then
     cat <<-EOF > "$XPM_DATA/primecoin.conf"
     rpcallowip=::/0
     rpcpassword=${RPC_PASSWORD}
@@ -26,7 +26,7 @@ fi
 
 if [ "$1" = "primecoind" ] || [ "$1" = "primecoin-cli" ] || [ "$1" = "primecoin-tx" ]; then
   echo
-  exec su-exec primecoin "$@"
+  exec gosu primecoin "$@"
 fi
 
 exec "$@"
