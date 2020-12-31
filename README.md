@@ -17,10 +17,6 @@ $ docker run --name primecoind \
   -rpcuser=foo
 ```
 
-## Supported tags
-
-See <https://hub.docker.com/r/primecoin/primecoind/tags>
-
 ## Usage - More Explanations
 
 ### How to use this image
@@ -75,3 +71,10 @@ Now you will be able to `curl` peercoin in the container:
 
 `curl --user foo:bar --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "getblockchaininfo", "params": [] }'  -H 'content-type: text/plain;' localhost:9912/`
 
+## Supported branches to build
+
+The default build for development of primecoin-0.2/satoshi-0.16 uses the development branch primecoin-0.16.3. To build other compatible satoshi-0.16 branches use the `branch` build option:
+
+```sh
+docker build 0.2 --build-arg branch=<primecoin-repo-branch-name>
+```
