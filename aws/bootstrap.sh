@@ -16,6 +16,14 @@ mkdir ~/ssd
 sudo mkfs.ext4 /dev/nvme1n1
 echo "/dev/nvme1n1 /home/ubuntu/ssd auto noatime 0 0" | sudo tee -a /etc/fstab
 sudo mount -a
+sudo mkdir ~/ssd/docker
 
-echo "Bootstrap done."
+sudo cat >/etc/docker/daemon.json <<CONF
+{
+  "data-root": "/home/ubuntu/ssd/docker"
+}
+CONF
+
+sudo systemctl restart docker
 docker --version
+echo "Bootstrap done."
