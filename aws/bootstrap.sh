@@ -3,7 +3,9 @@
 
 sudo apt update
 sudo apt install -y docker.io
-sudo usermod -aG docker ubuntu
+# Avoid adding ubuntu to docker group
+# https://askubuntu.com/a/982187
+sudo setfacl -m user:ubuntu:rw /var/run/docker.sock
 
 if [ -d ~/ssd ]; then
     echo "SSD mount already exists, bootstrapped already?"
@@ -11,12 +13,9 @@ if [ -d ~/ssd ]; then
 fi
 
 mkdir ~/ssd
-
 sudo mkfs.ext4 /dev/nvme1n1
-
 echo "/dev/nvme1n1 /home/ubuntu/ssd auto noatime 0 0" | sudo tee -a /etc/fstab
-
 sudo mount -a
 
-# Need to re-login to allow group membership be acknowledged
-echo "Bootstrap done, please exit the ssh session and login again."
+echo "Bootstrap done."
+docker --version
