@@ -2,7 +2,7 @@
 # AWS r5d r5ad r5dn ubuntu 20.04
 
 sudo apt update
-sudo apt install -y docker.io
+sudo apt install -y docker.io acl
 # Avoid adding ubuntu to docker group
 # https://askubuntu.com/a/982187
 sudo setfacl -m user:ubuntu:rw /var/run/docker.sock
