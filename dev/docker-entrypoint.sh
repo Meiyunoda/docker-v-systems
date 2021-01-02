@@ -10,8 +10,6 @@ if [ "$(echo "$1" | cut -c1)" = "-" ]; then
   set -- java -jar /opt/v-systems/bin/v-systems.jar "$@"
 fi
 
-echo "$@"
-
 if [ "$(echo "$1" | cut -c1)" = "-" ] || [ "$1" = "java" ]; then
 
   mkdir -p "$V_SYSTEMS_DATA"
