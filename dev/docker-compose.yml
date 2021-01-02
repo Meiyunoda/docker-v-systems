@@ -1,0 +1,17 @@
+version: '3.5'
+services:
+  primecoind:
+    build: .
+    restart: always
+    image: primecoind:next
+    environment:
+    volumes:
+      - type: bind
+        source: /opt/v-systems/
+        target: /data
+    command:
+    ports:
+      - '9921:9921'
+      - '9922:9922'
+      - '9923:9923'
+      - '9924:9924'
