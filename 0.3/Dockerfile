@@ -1,22 +1,16 @@
 # Build stage for v systems
 FROM ubuntu:20.04 as v-systems-build
-
-RUN apt update && apt install -y gnupg curl
-RUN echo "deb https://dl.bintray.com/sbt/debian /" | tee -a /etc/apt/sources.list.d/sbt.list
-RUN curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | apt-key add
-#RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2EE0EA64E40A89B84B2DF73499E82A75642AC823
-RUN apt update && apt install -y git sbt openjdk-8-jre-headless
-
-RUN git clone https://github.com/virtualeconomy/v-systems
-WORKDIR /v-systems
-ARG commit=master
-RUN git checkout ${commit} && echo `git status`
-RUN sbt packageAll
+RUN apt update && apt install -y wget
 
 ENV V_SYSTEMS_VERSION=0.3.2
+ENV V_SYSTEMS_SHA=6cbfb4028842f1fad44ca15f95bdb38880b3fce5fd8d80a5b39b5cd9a735a424
 ENV V_SYSTEMS_PREFIX=/opt/v-systems
+
+RUN wget -q -O v-systems.jar https://github.com/virtualeconomy/v-systems/releases/download/v${V_SYSTEMS_VERSION}/v-systems-${V_SYSTEMS_VERSION}.jar \
+    && echo "${V_SYSTEMS_SHA}  v-systems.jar" | sha256sum -c -
+
 RUN mkdir -p ${V_SYSTEMS_PREFIX}/bin
-RUN cp target/vsys-all-${V_SYSTEMS_VERSION}.jar ${V_SYSTEMS_PREFIX}/bin/v-systems.jar
+RUN cp ./v-systems.jar ${V_SYSTEMS_PREFIX}/bin/v-systems.jar
 RUN chmod ugo+rx ${V_SYSTEMS_PREFIX}/bin/
 
 # Build stage for compiled artifacts
