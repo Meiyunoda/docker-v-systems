@@ -1,32 +1,27 @@
 #!/bin/bash
 set -e
 
+if [ "$@" = "java" ]; then
+  set -- "$@" -jar /opt/v-systems/bin/v-systems.jar /v-systems.conf
+fi
+
 if [ "$(echo "$1" | cut -c1)" = "-" ]; then
-  echo "$0: assuming arguments for primecoind"
-  set -- primecoind "$@"
+  echo "$0: assuming arguments for v systems"
+  set -- java -jar /opt/v-systems/bin/v-systems.jar "$@"
 fi
 
-if [ "$(echo "$1" | cut -c1)" = "-" ] || [ "$1" = "primecoind" ]; then
+echo "$@"
 
-  mkdir -p "$XPM_DATA"
-  chmod 700 "$XPM_DATA"
-  chown -R primecoin "$XPM_DATA"
+if [ "$(echo "$1" | cut -c1)" = "-" ] || [ "$1" = "java" ]; then
 
-  if [[ ! -s "$XPM_DATA/primecoin.conf" ]]; then
-    cat <<-EOF > "$XPM_DATA/primecoin.conf"
-    rpcallowip=::/0
-    rpcpassword=${RPC_PASSWORD}
-    rpcuser=${RPC_USER}
-		EOF
-    chown primecoin "$XPM_DATA/primecoin.conf"
-	fi
-
-  set -- "$@" -datadir="$XPM_DATA"
+  mkdir -p "$V_SYSTEMS_DATA"
+  chmod 700 "$V_SYSTEMS_DATA"
+  chown -R vsystems "$V_SYSTEMS_DATA"
 fi
 
-if [ "$1" = "primecoind" ] || [ "$1" = "primecoin-cli" ] || [ "$1" = "primecoin-tx" ]; then
+if [ "$1" = "java" ]; then
   echo
-  exec su-exec primecoin "$@"
+  exec gosu vsystems "$@"
 fi
 
 exec "$@"

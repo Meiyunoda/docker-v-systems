@@ -1,106 +1,44 @@
-# Build stage for BerkeleyDB
-FROM alpine:3.3 as berkeleydb
+# Build stage for v systems
+FROM ubuntu:20.04 as v-systems-build
 
-RUN apk --no-cache add autoconf
-RUN apk --no-cache add automake
-RUN apk --no-cache add build-base
-RUN apk --no-cache add openssl
+RUN apt update && apt install -y gnupg curl
+RUN echo "deb https://dl.bintray.com/sbt/debian /" | tee -a /etc/apt/sources.list.d/sbt.list
+RUN curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | apt-key add
+#RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2EE0EA64E40A89B84B2DF73499E82A75642AC823
+RUN apt update && apt install -y git sbt openjdk-8-jre-headless
 
-ENV BERKELEYDB_VERSION=db-4.8.30.NC
-ENV BERKELEYDB_PREFIX=/opt/berkleydb
+RUN git clone https://github.com/virtualeconomy/v-systems
+WORKDIR /v-systems
+ARG commit=master
+RUN git checkout ${commit} && echo `git status`
+RUN sbt packageAll
 
-RUN wget -q https://download.oracle.com/berkeley-db/${BERKELEYDB_VERSION}.tar.gz
-RUN tar -xzf *.tar.gz
-RUN sed s/__atomic_compare_exchange/__atomic_compare_exchange_db/g -i ${BERKELEYDB_VERSION}/dbinc/atomic.h
-RUN mkdir -p ${BERKELEYDB_PREFIX}
-
-WORKDIR /${BERKELEYDB_VERSION}/build_unix
-
-RUN ../dist/configure --enable-cxx --disable-shared --with-pic --prefix=${BERKELEYDB_PREFIX}
-RUN make -j4
-RUN make install
-RUN rm -rf ${BERKELEYDB_PREFIX}/docs
-
-# Build stage for primecoind
-FROM alpine:3.3 as primecoin-build
-
-COPY --from=berkeleydb /opt/ /opt/
-
-RUN apk --no-cache add autoconf \
-    automake \
-    boost-dev \
-    build-base \
-    chrpath \
-    file \
-    libevent-dev \
-    openssl \
-    openssl-dev \
-    libtool \
-    linux-headers \
-    zeromq-dev \
-    protobuf-dev
-
-ENV PEERCOIN_VERSION=0.9.0ppc \
-    PEERCOIN_SHA=95f4d50706f0eb2c14e3f3b149cbb3e7bfbc71ea33ef3e778dc9a477841a35b5 \
-    PRIMECOIN_PREFIX=/opt/primecoin
-
-ARG branch=primecoin-0.16.3
-RUN apk --no-cache add git
-RUN git clone https://github.com/primecoin/primecoin
-RUN cd primecoin && git checkout ${branch} && echo `git status`
-
-WORKDIR /primecoin
-
-# ./configure can't find berkley db unless we do this
-RUN ln -s /opt/berkleydb /usr/include/db4.8 \
-    && ln -s /opt/berkleydb/include/* /usr/include  \
-    && ln -s /opt/berkleydb/lib/* /usr/lib
-
-RUN ./autogen.sh
-RUN ./configure \
-    --prefix=${PRIMECOIN_PREFIX} \
-    --mandir=/usr/share/man \
-    --disable-tests \
-    --disable-bench \
-    --disable-ccache \
-    --with-gui=no \
-    --with-utils \
-    --with-libs \
-    --with-daemon
-RUN make -j4
-RUN make install
-RUN strip ${PRIMECOIN_PREFIX}/bin/primecoin-cli
-RUN strip ${PRIMECOIN_PREFIX}/bin/primecoin-tx
-RUN strip ${PRIMECOIN_PREFIX}/bin/primecoind
-RUN strip ${PRIMECOIN_PREFIX}/lib/libbitcoinconsensus.a
-RUN strip ${PRIMECOIN_PREFIX}/lib/libbitcoinconsensus.so.0.0.0
+ENV V_SYSTEMS_VERSION=0.3.2
+ENV V_SYSTEMS_PREFIX=/opt/v-systems
+RUN mkdir -p ${V_SYSTEMS_PREFIX}/bin
+RUN cp target/vsys-all-${V_SYSTEMS_VERSION}.jar ${V_SYSTEMS_PREFIX}/bin/v-systems.jar
+RUN chmod ugo+rx ${V_SYSTEMS_PREFIX}/bin/
 
 # Build stage for compiled artifacts
-FROM alpine:3.3
+FROM ubuntu:20.04
 
-RUN adduser -S primecoin && \
-  apk --no-cache add \
-    boost \
-    boost-program_options \
-    libevent \
-    openssl \
-    libzmq \
-    su-exec \
-    bash
+RUN adduser --system vsystems && \
+  apt update && \
+  apt install -y openjdk-8-jre-headless gosu
+RUN which java
 
-ENV XPM_DATA=/data
-ENV PRIMECOIN_PREFIX=/opt/primecoin
-ENV PATH=${PRIMECOIN_PREFIX}/bin:$PATH
-ENV RPC_PASSWORD=xpmpass
-ENV RPC_USER=xpmuser
+ENV V_SYSTEMS_DATA=/data
+ENV V_SYSTEMS_PREFIX=/opt/v-systems
+ENV PATH=${V_SYSTEMS_PREFIX}/bin:$PATH
 
-COPY --from=primecoin-build /opt /opt
+COPY --from=v-systems-build /opt /opt
 COPY docker-entrypoint.sh /entrypoint.sh
+COPY v-systems.conf /v-systems.conf
 
-VOLUME ["${XPM_DATA}"]
+VOLUME ["${V_SYSTEMS_DATA}"]
 
-EXPOSE 9911 9912 9913 9914
+EXPOSE 9921 9922 9923 9924
 
 ENTRYPOINT ["/entrypoint.sh"]
 
-CMD ["primecoind"]
+CMD ["java"]
