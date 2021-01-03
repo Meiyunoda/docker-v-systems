@@ -1,80 +1,57 @@
-# primecoin/primecoind
+# vsystems/v-systems
 
-Primecoind docker image. Provides a classic primecoin binary built from the [github/primecoin](https://github.com/primecoin/primecoin) repository.
+V Systems docker image. Provides standard docker builds from the [v systems github](https://github.com/virtualeconomy/v-systems) repository.
 
 ## Usage
 
 ```sh
-$ docker run --name primecoind \
-  -v /home/ubuntu/docker-primecoind-data:/data \
-  -p 9911:9911 \
-  -p 9912:9912 \
-  -d primecoin/primecoind \
-  -txindex \
-  -printtoconsole \
-  -rpcallowip=0.0.0.0/0 \
-  -rpcpassword=bar \
-  -rpcuser=foo
+$ docker run --name v-systems-0.3.2 \
+  -v docker-v-systems-data:/data \
+  -p 9921:9921 \
+  -p 9922:9922 \
+  -d vsystems/v-systems-0.3.2
 ```
 
 ## Usage - More Explanations
 
-### How to use this image
+### How to use the public images
 
-It behaves like a command, so you can pass any arguments to the image and they will be forwarded to the `primecoind` binary:
-
-```sh
-$ docker run --name primecoind -d primecoin/primecoind \
-  -rpcallowip=0.0.0.0/0 \
-  -rpcpassword=bar \
-  -rpcuser=foo
-```
-
-Use the same command to start the testnet container:
+By default, `java` will run as as user `vsystems` for security reasons and store data in `/data`. If you'd like to customize where `java` stores its data, use the `V_SYSTEMS_DATA` environment variable. The directory will be automatically created with the correct permissions for the user and `vsystems` automatically configured to use it.
 
 ```sh
-$ docker run --name primecoind-testnet -d primecoin/primecoind \
-  -rpcallowip=0.0.0.0/0 \
-  -rpcpassword=bar \
-  -rpcuser=foo \
-  -testnet
-```
-
-By default, `primecoin` will run as as user `primecoin` for security reasons and store data in `/data`. If you'd like to customize where `primecoin` stores its data, use the `XPM_DATA` environment variable. The directory will be automatically created with the correct permissions for the user and `primecoin` automatically configured to use it.
-
-```sh
-$ docker run --env XPM_DATA=/var/lib/primecoin --name primecoind -d primecoin/primecoind
+$ docker run --env V_SYSTEMS_DATA=/var/lib/v-systems --name v-systems-0.3.2 -d vsystems/v-systems-0.3.2
 ```
 
 You can also mount a host directory at `/data` like so:
 
 ```sh
-$ docker run -v /opt/primecoin:/data --name primecoind -d primecoin/primecoind
+$ docker run -v /opt/v-systems:/data --name vsystemsd -d vsystems/v-systems-0.3.2
 ```
-That will allow access to `/data` in the container as `/opt/primecoin` on the host.
+That will allow access to `/data` in the container as `/opt/v-systems` on the host.
 
 ```sh
-$ docker run -v ${PWD}/data:/data --name primecoind -d primecoin/primecoind
+$ docker run -v ${PWD}/data:/data --name vsystemsd -d vsystems/v-systems-0.3.2
 ```
 will mount the `data` sub-directory at `/data` in the container.
 
-To map container RPC ports to localhost use the `-p` argument with `docker run`:
+You may want to change the port that it is being mapped to if you already run a v systems instance on the host.
+
+For example: `-p 9999:9922` will map container port 9922 to host port 9999.
+
+Now you will be able to `curl` v systems in the container:
+
+`curl http://localhost:9999/blocks/height`
+
+## Support for development build
+
+The dev build for development of v systems uses latest master branch of v systems official repo. To build for a specific commit, or branch/tag name:
 
 ```sh
-$ docker run -p 9912:9912 --name primecoind -d primecoin/primecoind -rpcallowip=*
+docker build dev --build-arg commit=<commit/branch/tag>
 ```
-You may want to change the port that it is being mapped to if you already run a peercoin instance on the host.
 
-For example: `-p 9999:9912` will map container port 9912 to host port 9999.
-
-Now you will be able to `curl` peercoin in the container:
-
-`curl --user foo:bar --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "getblockchaininfo", "params": [] }'  -H 'content-type: text/plain;' localhost:9912/`
-
-## Supported branches to build
-
-The default build for development of primecoin-0.2/satoshi-0.16 uses the development branch primecoin-0.16.3. To build other compatible satoshi-0.16 branches use the `branch` build option:
+To build for txtype index and api support which are required for most wallet server nodes:
 
 ```sh
-docker build 0.2 --build-arg branch=<primecoin-repo-branch-name>
+docker build dev --build-arg txtype=true -t vsystems/v-systems-dev-txserver
 ```
