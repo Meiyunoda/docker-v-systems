@@ -7,8 +7,10 @@ fi
 
 if [ "$(echo "$1" | cut -c1)" = "-" ]; then
   echo "$0: assuming arguments for v systems"
-  set -- java -jar /opt/v-systems/bin/v-systems.jar "$@"
+  set -- java "$@" -jar /opt/v-systems/bin/v-systems.jar /v-systems.conf
 fi
+
+echo "$@"
 
 if [ "$(echo "$1" | cut -c1)" = "-" ] || [ "$1" = "java" ]; then
 
