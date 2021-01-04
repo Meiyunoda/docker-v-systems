@@ -55,3 +55,12 @@ To build for txtype index and api support which are required for most wallet ser
 ```sh
 docker build dev --build-arg txtype=true -t vsystems/v-systems-dev-txserver
 ```
+
+## Support for running public images for testnet
+
+Running 0.3.2 testnet with API port open:
+
+```sh
+docker run --name vsystemsd-testnet -p 9923:9923 -p 9924:9922 -d \
+  vsystems/v-systems-0.3.2 -Dvsys.blockchain.type=TESTNET -Dvsys.network.port=9923 -Dvsys.rest-api.bind-address=0.0.0.0
+```
