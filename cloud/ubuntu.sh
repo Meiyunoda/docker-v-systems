@@ -15,7 +15,8 @@ sudo apt install -y vim docker.io acl
 sudo setfacl -m user:ubuntu:rw /var/run/docker.sock
 
 # Disable ssh password authentication
-sudo sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config
+sudo sed -i 's/^#*PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config
+sudo sed -i 's/^PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config
 grep PasswordAuthentication /etc/ssh/sshd_config
 sudo service ssh restart
 echo "SSH password authentication disabled."
