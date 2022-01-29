@@ -2,7 +2,8 @@
 FROM ubuntu:20.04 as v-systems-build
 
 RUN apt update && apt install -y gnupg curl
-RUN echo "deb https://dl.bintray.com/sbt/debian /" | tee -a /etc/apt/sources.list.d/sbt.list
+RUN echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | tee /etc/apt/sources.list.d/sbt.list
+RUN echo "deb https://repo.scala-sbt.org/scalasbt/debian /" | tee /etc/apt/sources.list.d/sbt_old.list
 RUN curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | apt-key add
 RUN apt update && apt install -y git sbt openjdk-8-jre-headless
 
@@ -15,7 +16,7 @@ RUN if [ "$txtype" = "true" ]; then sed -i 's/tx-type-account-tx-ids = off/tx-ty
 RUN cat src/main/resources/application.conf | grep tx-type-account-tx-ids
 RUN sbt packageAll
 
-ARG version=0.3.2
+ARG version=0.4.2
 ENV V_SYSTEMS_PREFIX=/opt/v-systems
 RUN mkdir -p ${V_SYSTEMS_PREFIX}/bin
 RUN cp target/vsys-all-${version}.jar ${V_SYSTEMS_PREFIX}/bin/v-systems.jar
