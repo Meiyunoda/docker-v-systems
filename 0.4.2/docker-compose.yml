@@ -1,0 +1,15 @@
+version: '3.5'
+services:
+  Vsys42:
+    build: .
+    restart: always
+    image: vsys42:v1
+    volumes:
+      - type: bind
+        source: /opt/v-systems/
+        target: /data
+    ports:
+      - '9921:9921'
+      - '9922:9922'
+      - '9923:9923'
+      - '9924:9924'
